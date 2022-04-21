@@ -137,7 +137,7 @@ def main():
     parser.add_argument('-b', type=int, default=100, help='Bin size, default=100nt')
     parser.add_argument('-t', type=int, default=2000, help='Tick interval, default=2,000nt')
     parser.add_argument('--mt_name', default='chrM', help='Mitochondria name in reference genome, default=chrM')
-    parser.add_argument('--selected', default=['CD4T', 'HEK293T', 'hESC-H9', 'DLTB', 'TLTB'], nargs='+', help='Selected genotypes')
+    parser.add_argument('--selected', default=['CD4T', 'HEK293T', 'hESC-H9', 'DLTB', 'TLTB'], nargs='+', help='Selected genotypes, (All WT > 3)')
     args = parser.parse_args()
     args.c -= 1
 
