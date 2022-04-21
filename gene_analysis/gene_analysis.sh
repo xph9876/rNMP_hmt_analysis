@@ -100,7 +100,7 @@ for st in template nontemplate
 do
     for ty in cds
     do
-        eval $scripts/gene_analysis/draw_line.py info/${ty}_${st}.tsv -o plots/regplot/${ty}_${st} &
+        eval $scripts/gene_analysis/draw_regplot.py info/${ty}_${st}.tsv -o plots/regplot/${ty}_${st} &
     done
 done
 wait
