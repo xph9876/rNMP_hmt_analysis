@@ -113,12 +113,17 @@ def draw(data, hotspots, size, bin, out, tick_interval=2000, scale_pos=np.pi):
     plt.ylim((-mx*1, mx*3))
     ax.set_rorigin(-1.5*mx)
 
-    # draw hotspot lines
+    # draw hotspots
     colors_h = {'+':'#FB5156', '-':'#5555FF'}
-    heights_h = {'+':2.5*mx, '-':2*mx}
+    heights_high = {'+':2.5*mx, '-':1.8*mx}
+    heights_low = {'+':2.2*mx, '-':2*mx}
     for loc,st in hotspots:
         loc = 2*np.pi/size*loc
-        ax.plot((loc,loc), (0, heights_h[st]), color=colors_h[st], linewidth=1)
+        # short lines
+        ax.plot((loc,loc), (heights_low[st], heights_high[st]), color=colors_h[st], linewidth=1)
+        # dots
+        ax.plot(loc, heights_high[st], color=colors_h[st], marker='o', markersize=10)
+
     
     # plot a line for zero
     ax.plot([0]*50, np.linspace(0, mx*3, 50), 'k', linewidth=2)
