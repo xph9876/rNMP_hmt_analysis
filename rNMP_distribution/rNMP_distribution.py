@@ -36,42 +36,42 @@ def load_bed(bed, size, bin, name):
 
 # draw circular barplot
 def draw(data, size, bin, out, tick_interval=2000, scale_pos=1.1*np.pi):
-    colors = {'+':'red', '-':'blue'}
-    sns.set(style='ticks', font_scale=2.25)
-    fig, _ = plt.subplots(figsize=(6,6))
+    colors = {'+':'#FB5156', '-':'#5555FF'}
+    sns.set(style='ticks', font_scale=3)
+    fig, _ = plt.subplots(figsize=(20,20))
     ax = plt.subplot(111, polar=True)
     # calc width and angles
     width = np.pi * 2 / len(data['+'])
     angles = [x*width for x in range(len(data['+']))]
     # plot forward
-    for_bars = ax.bar(angles, data['+'], width=width, color=colors['+'])
+    for_bars = ax.bar(angles, data['+'], width=width, color=colors['+'], edgecolor=colors['+'], linewidth=0.2)
     # plot reverse
     rev = [-x for x in data['-']]
-    rev_bars = ax.bar(angles, rev, width=width, color=colors['-'])
+    rev_bars = ax.bar(angles, rev, width=width, color=colors['-'], edgecolor=colors['-'], linewidth=0.2)
     # theta ticks
     ax.xaxis.set_tick_params(size=2, width=2)
     ax.set_xticks([x*tick_interval*2*np.pi/size for x in range(size//tick_interval+1)])
     ax.set_xticklabels([int(x*tick_interval/1000) for x in range(size//tick_interval+1)])
     # limits
     mx = max(max(data['+']), max(data['-']))
-    plt.ylim((-mx, mx))
-    ax.set_rorigin(-2*mx)
+    plt.ylim((-mx/2, mx/2))
+    ax.set_rorigin(-mx*0.8)
     # plot a line for zero
-    plt.plot((0,0), (-mx*1.2, mx*1.2), color='k', linewidth=2)
+    plt.plot((0,0), (0, mx*1.2), color='k', linewidth=2)
     # plot other small ticks
     for x in range(1, size//tick_interval+1):
         loc = x * tick_interval * np.pi * 2 / size
         plt.plot((loc, loc), (0, mx*1.2), color='k', linewidth=1)
     # draw an r scale
     ax.yaxis.set_visible(False)
-    plt.plot((scale_pos - 3/180*np.pi, scale_pos + 3/180*np.pi), (max(data['+']), max(data['+'])), color='k', linewidth=1.5)
-    plt.plot((scale_pos - 5/180*np.pi, scale_pos + 5/180*np.pi), (-max(data['-']), -max(data['-'])), color='k', linewidth=1.5)
-    plt.plot((scale_pos, scale_pos), (max(data['+']), -max(data['-'])), color='k', linewidth=1.5)
-    plt.text(scale_pos, max(data['+'])*1.05, str(max(data['+'])), ha='center', va='top', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
-    plt.text(scale_pos, -max(data['-'])*0.95, str(max(data['-'])), ha='center', va='bottom', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
+    # plt.plot((scale_pos - 3/180*np.pi, scale_pos + 3/180*np.pi), (max(data['+']), max(data['+'])), color='k', linewidth=1.5)
+    # plt.plot((scale_pos - 5/180*np.pi, scale_pos + 5/180*np.pi), (-max(data['-']), -max(data['-'])), color='k', linewidth=1.5)
+    # plt.plot((scale_pos, scale_pos), (max(data['+']), -max(data['-'])), color='k', linewidth=1.5)
+    # plt.text(scale_pos, max(data['+'])*1.05, str(max(data['+'])), ha='center', va='top', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
+    # plt.text(scale_pos, -max(data['-'])*0.95, str(max(data['-'])), ha='center', va='bottom', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
     # plot position
     ax.set_theta_zero_location('N')
-    ax.set_theta_direction(1)
+    ax.set_theta_direction(-1)
     plt.setp(ax.spines.values(), linewidth=0)
     # other settings
     ax.grid(False)

@@ -19,6 +19,17 @@ def get_mt_size(fai, name):
     return None
 
 
+# load hotspots
+def read_hotspots(fr):
+    data = []
+    for l in fr:
+        ws = l.rstrip('\n').split('\t')
+        if len(ws) < 6:
+            continue
+        data.append((int(ws[1]), ws[5]))
+    return data
+
+
 # load rNMP coordinates
 def load_bed(bed, size, info, counts, bin, name, selected):
     data = {}
@@ -72,52 +83,70 @@ def read_mito_count(fr):
 
 
 # draw circular barplot
-def draw(data, size, bin, out, tick_interval=2000, scale_pos=np.pi):
+def draw(data, hotspots, size, bin, out, tick_interval=2000, scale_pos=np.pi):
     colors = {x:sns.color_palette('Set1')[i] for i, x in enumerate(data)}
     linestyle = {'+':'-', '-':'-'}
     sns.set(style='ticks', font_scale=2.25)
     fig, _ = plt.subplots(figsize=(15,10))
     plt.subplots_adjust(left=0, right=0.7)
     ax = plt.subplot(111, polar=True)
+
     # calc width and angles
     width = np.pi * 2 / (size//bin + 1)
     angles = [x*width for x in range(size//bin + 1)] + [0]
-    # each genotype
+
+    # draw line for each genotype
     for geno, d in data.items():
         # plot forward
         for_bars = ax.plot(angles, d['+']+[d['+'][0]], linestyle=linestyle['+'], color=colors[geno], label=geno)
         # plot reverse
         rev = [-x for x in d['-']+[d['-'][0]]]
         rev_bars = ax.plot(angles, rev, linestyle=linestyle['-'], color=colors[geno])
+
     # theta ticks
     ax.xaxis.set_tick_params(size=2, width=2)
     ax.set_xticks([x*tick_interval*2*np.pi/size for x in range(size//tick_interval+1)])
     ax.set_xticklabels([int(x*tick_interval/1000) for x in range(size//tick_interval+1)])
+
     # limits
     mx = max(max(max(d['+']) for d in data.values()), max(max(d['-']) for d in data.values()))
-    plt.ylim((-mx, mx))
-    # ax.set_rorigin(-2*mx)
+    plt.ylim((-mx*1, mx*3))
+    ax.set_rorigin(-1.5*mx)
+
+    # draw hotspot lines
+    colors_h = {'+':'#FB5156', '-':'#5555FF'}
+    heights_h = {'+':2.5*mx, '-':2*mx}
+    for loc,st in hotspots:
+        loc = 2*np.pi/size*loc
+        ax.plot((loc,loc), (0, heights_h[st]), color=colors_h[st], linewidth=1)
+    
     # plot a line for zero
-    ax.plot([0]*50, np.linspace(0, mx*1.2, 50), 'k', linewidth=2)
+    ax.plot([0]*50, np.linspace(0, mx*3, 50), 'k', linewidth=2)
+
     # plot other small ticks
     for x in range(1, size//tick_interval+1):
         loc = x * tick_interval * np.pi * 2 / size
-        ax.plot((loc, loc), (0, mx*1.2), color='k', linewidth=1)
+        ax.plot((loc, loc), (0, mx*3), color='k', linewidth=1)
+    
     # draw an r scale
     ax.yaxis.set_visible(False)
     ax.plot(np.linspace(0, np.pi*2, num=50), [0]*50, color='k', linewidth=3)
     ax.plot(np.linspace(0, np.pi*2, num=50), [1]*50, color='k', linestyle='dotted', linewidth=1.5)
     ax.plot(np.linspace(0, np.pi*2, num=50), [-1]*50, color='k', linestyle='dotted', linewidth=1.5)
-    plt.plot((scale_pos - 3/180*np.pi, scale_pos + 3/180*np.pi), (-1, -1), color='k', linewidth=1.5)
-    plt.plot((scale_pos - 5/180*np.pi, scale_pos + 5/180*np.pi), (1, 1), color='k', linewidth=1.5)
-    plt.plot((scale_pos, scale_pos), (-1, 1), color='k', linewidth=1.5)
-    plt.text(scale_pos, 1*1.05, '1', ha='center', va='top', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
-    plt.text(scale_pos, -1*0.95, '1', ha='center', va='bottom', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
+    
+    # this part is used to draw a scale, i.e. 1 for both light and heavy strand
+    # plt.plot((scale_pos - 3/180*np.pi, scale_pos + 3/180*np.pi), (-1, -1), color='k', linewidth=1.5)
+    # plt.plot((scale_pos - 5/180*np.pi, scale_pos + 5/180*np.pi), (1, 1), color='k', linewidth=1.5)
+    # plt.plot((scale_pos, scale_pos), (-1, 1), color='k', linewidth=1.5)
+    # plt.text(scale_pos, 1*1.05, '1', ha='center', va='top', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
+    # plt.text(scale_pos, -1*0.95, '1', ha='center', va='bottom', rotation=scale_pos/np.pi*180+180, rotation_mode='anchor')
+    
     # plot position
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
     plt.setp(ax.spines.values(), linewidth=0)
     plt.legend(loc=(1.1,0.1))
+    
     # other settings
     ax.grid(False)
     fig.savefig(out)
@@ -127,11 +156,13 @@ def draw(data, size, bin, out, tick_interval=2000, scale_pos=np.pi):
 
 def main():
     # argparse
-    parser = argparse.ArgumentParser(description='Draw combined circular barplot for rNMP incorporation in mitonchondrial dNA')
+    parser = argparse.ArgumentParser(description='Draw combined circular barplot for rNMP incorporation in mitonchondrial DNA, ' + \
+                                                'along with hotspots')
     parser.add_argument('bed', type=argparse.FileType('r'), nargs='+', help='rNMP incorporation bed files')
     parser.add_argument('fai', type=argparse.FileType('r'), help='Fasta index file')
     parser.add_argument('libinfo', type=argparse.FileType('r'), help='Library information')
     parser.add_argument('count', type=argparse.FileType('r'), help='rNMP count for each library')
+    parser.add_argument('hotspots', type=argparse.FileType('r'), help='bed file for hotspots')
     parser.add_argument('-o', default='mt.png', help='Output figure name, (mt.png)')
     parser.add_argument('-c', type=int, default=2, help='Col num for FS number, default=2')
     parser.add_argument('-b', type=int, default=100, help='Bin size, default=100nt')
@@ -150,11 +181,14 @@ def main():
     # load mito count
     counts = read_mito_count(args.count)
 
+    # load hotspots
+    hotspots = read_hotspots(args.hotspots)
+
     # load data
     data = load_bed(args.bed, size, info, counts, args.b, args.mt_name, args.selected)
 
     # draw
-    draw(data, size, args.b, args.o, tick_interval=args.t)
+    draw(data, hotspots, size, args.b, args.o, tick_interval=args.t)
 
     print('Done!')
 
