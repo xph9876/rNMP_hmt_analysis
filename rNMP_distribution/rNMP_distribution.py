@@ -20,7 +20,7 @@ def get_mt_size(fai, name):
 
 
 # load rNMP coordinates
-def load_bed(bed, size, bin, name):
+def load_bed(bed, size, bin, name, fid):
     data = {'+':[0]*(size//bin+1), '-':[0]*(size//bin+1)}
     for l in bed:
         ws = l.rstrip('\n').split('\t')
@@ -30,14 +30,21 @@ def load_bed(bed, size, bin, name):
             continue
         loc = int(ws[1])
         st = ws[5]
-        data[st][loc//bin] += 1
+        if fid:
+            try:
+                data[st][loc//bin] += float(ws[fid-1])
+            except ValueError:
+                print(f'[ERROR] line:{l}, column {fid-1} is not a valid frequency')
+                assert False
+        else:
+            data[st][loc//bin] += 1
     return data
 
 
 # draw circular barplot
 def draw(data, size, bin, out, tick_interval=2000, scale_pos=1.1*np.pi):
     colors = {'+':'#FB5156', '-':'#5555FF'}
-    sns.set(style='ticks', font_scale=3)
+    sns.set(style='ticks', font_scale=10)
     fig, _ = plt.subplots(figsize=(20,20))
     ax = plt.subplot(111, polar=True)
     # calc width and angles
@@ -55,13 +62,13 @@ def draw(data, size, bin, out, tick_interval=2000, scale_pos=1.1*np.pi):
     # limits
     mx = max(max(data['+']), max(data['-']))
     plt.ylim((-mx/2, mx/2))
-    ax.set_rorigin(-mx*0.8)
+    ax.set_rorigin(-mx*0.6)
     # plot a line for zero
-    plt.plot((0,0), (0, mx*1.2), color='k', linewidth=2)
+    plt.plot((0,0), (0, mx*0.4), color='k', linewidth=4)
     # plot other small ticks
     for x in range(1, size//tick_interval+1):
         loc = x * tick_interval * np.pi * 2 / size
-        plt.plot((loc, loc), (0, mx*1.2), color='k', linewidth=1)
+        plt.plot((loc, loc), (0, mx*0.4), color='k', linewidth=2)
     # draw an r scale
     ax.yaxis.set_visible(False)
     # plt.plot((scale_pos - 3/180*np.pi, scale_pos + 3/180*np.pi), (max(data['+']), max(data['+'])), color='k', linewidth=1.5)
@@ -88,14 +95,15 @@ def main():
     parser.add_argument('-o', default='mt.png', help='Output figure name, (mt.png)')
     parser.add_argument('-b', type=int, default=100, help='Bin size, default=100nt')
     parser.add_argument('-t', type=int, default=2000, help='Tick interval, default=2,000nt')
-    parser.add_argument('--mt_name', default='chrM', help='Mitochondria name in reference genome, default=chrM')
+    parser.add_argument('-f', type=int, default=0, help='Read rNMP frequency from which column? (one rNMP per line by default)')
+    parser.add_argument('--mt_name', default='chrM', help='Mitochondria name in reference genome (chrM)')
     args = parser.parse_args()
 
     # mt size
     size = get_mt_size(args.fai, args.mt_name)
 
     # load data
-    data = load_bed(args.bed, size, args.b, args.mt_name)
+    data = load_bed(args.bed, size, args.b, args.mt_name, args.f)
 
     # draw
     draw(data, size, args.b, args.o, tick_interval=args.t)
