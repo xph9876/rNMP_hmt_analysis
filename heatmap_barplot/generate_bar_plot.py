@@ -26,6 +26,7 @@ def generate_df(fr):
 def main():
     parser = argparse.ArgumentParser(description='Generate barplot with datapoints from a mono tsv file')
     parser.add_argument('tsv', type=argparse.FileType('r'), help='Input tsv file')
+    parser.add_argument('--legend', action='store_true', help='Draw figure legend on the plots')
     parser.add_argument('-o', help='Output plot name')
     args = parser.parse_args()
 
@@ -39,9 +40,9 @@ def main():
     df = generate_df(args.tsv)
 
     # draw
-    sns.set(font_scale=1.8, style='ticks')
+    sns.set(font_scale=2.3, style='ticks')
     fig, ax = plt.subplots(figsize=(15,6))
-    plt.subplots_adjust(left=0.04, right=1, top=0.98, bottom=0.2)
+    plt.subplots_adjust(left=0.06, right=1, top=0.98, bottom=0.2)
     sns.barplot(x='Genotype', y='Values', hue='rNMP', data=df, palette=pal,\
             ci='sd', errwidth=1.2, capsize=0.12, edgecolor='k',linewidth=1.5,ax=ax)
     sns.swarmplot(x='Genotype', y='Values', hue='rNMP', data=df, dodge=True,\
@@ -57,11 +58,14 @@ def main():
         geno = l.get_text()
         count = len(df[df.Genotype == geno])/4
         xticklabels.append(geno.replace(' ', '\n') + f'\nN = {count:.0f}')
-    ax.set_xticklabels(xticklabels,fontsize=16)
+    ax.set_xticklabels(xticklabels,fontsize=19)
 
     # legend
-    handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles[4:], labels[4:])
+    if args.legend:
+        handles, labels = ax.get_legend_handles_labels()
+        plt.legend(handles[4:], labels[4:])
+    else:
+        ax.get_legend().remove()
 
     plt.savefig(args.o)
 

@@ -7,6 +7,8 @@ import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
+import matplotlib.ticker as ticker
+from curlyBrace import curlyBrace
 
 # replication origin coordinate
 cr1_s = 16024
@@ -98,11 +100,11 @@ def load_bed(same, oppo, total, flank):
 def draw_linecharts(df, out, pal):
     colors = {x:sns.color_palette(pal)[i] for i, x in enumerate(df.Celltype.unique())}
     global oh_s, oh_r, cr1_s, cr1_e, cr2_s, cr2_e
-    sns.set(style='ticks', font_scale=1.5)
+    sns.set(style='ticks', font_scale=2)
     df = df.sort_values(by='Position')
     df.to_csv(f'{out}.csv')
-    fig, axs = plt.subplots(2,1, figsize=(12,8))
-    plt.subplots_adjust(left=0.08, top=0.92, right=0.7, bottom=0.05, hspace=0.14)
+    fig, axs = plt.subplots(2,1, figsize=(12,8),dpi=300)
+    plt.subplots_adjust(left=0.05, top=0.92, right=0.7, bottom=0.05, hspace=0.18)
     # draw heavy and light separately
     for i, st in enumerate(['Light', 'Heavy']):
         for geno in df.Celltype.unique():
@@ -110,12 +112,12 @@ def draw_linecharts(df, out, pal):
             axs[i].plot(df_curr.Position, df_curr.Moving_avg, color=colors[geno], label=geno)
         axs[i].set_xlim((0, cr2_e - cr2_s + cr1_e - cr1_s + 1))
         axs[i].set_ylim((0, 6e-7))
-        # highlight
-        axs[i].axvspan(cr1_e-cr1_s+oh_s, cr1_e-cr1_s+oh_e, color='#BBBB00', alpha=0.2)
-        axs[i].set_ylabel(f'{st} PPB')
+        locs = [16100-cr1_s, 16300-cr1_s, cr1_e-cr1_s, cr1_e+200-cr1_s, cr1_e+400-cr1_s]
+        axs[i].xaxis.set_major_locator(ticker.FixedLocator(locs))
         if st == 'Light':
             axs[i].set_xlabel('')
             sns.despine(ax = axs[i])
+            axs[i].xaxis.set_ticklabels(['16100', '16300', '16569/0', '200', '400'])
         else:
             axs[i].invert_yaxis()
             axs[i].set_xlabel('Position')
@@ -123,6 +125,14 @@ def draw_linecharts(df, out, pal):
             axs[i].yaxis.get_offset_text().set_visible(False)
             sns.despine(ax = axs[i], top=False, bottom=True)
     plt.legend(loc=(1.02, 0.2))
+    # highlight OriH region
+    curlyBrace(
+        fig, axs[0], 
+        p1=(cr1_e+oh_s-cr1_s, 2e-7), 
+        p2=(cr1_e+oh_e-cr1_s, 2e-7),
+        str_text='OriH',
+        color='black'
+        )
     # tick labels
     fig.savefig(f'{out}.png')
     plt.close()
@@ -138,7 +148,7 @@ def main():
     parser.add_argument('-o', default='mt_cr', help='Output basename')
     parser.add_argument('--same', type=argparse.FileType('r'), nargs='+', help='Bed files on the same strand of MT-CR')
     parser.add_argument('--oppo', type=argparse.FileType('r'), nargs='+', help='Bed files on the opposite strand of MT-CR')
-    parser.add_argument('--selected', default=['CD4T', 'HEK293T', 'hESC-H9', 'DLTB', 'TLTB'], nargs='+', help='Selected genotypes, (All WT > 3)')
+    parser.add_argument('--selected', default=['CD4T', 'hESC-H9','HEK293T','DLTB', 'TLTB'], nargs='+', help='Selected genotypes, (All WT > 3)')
     parser.add_argument('--palette', default='Set1', help='Color paletter used to generate plots, (Set1)')
     args = parser.parse_args()
 

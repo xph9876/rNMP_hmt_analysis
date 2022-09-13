@@ -40,8 +40,8 @@ def main():
 
     # draw
     sns.set(font_scale=1.5, style='ticks')
-    fig, ax = plt.subplots(figsize=(12,6))
-    plt.subplots_adjust(left=0.08, right=1, top=0.98, bottom=0.25)
+    fig, ax = plt.subplots(figsize=(6,6))
+    plt.subplots_adjust(left=0.16, right=1, top=0.98, bottom=0.4)
     sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=df, palette=pal,\
         capsize=0.3, errwidth=1.2, ax=ax)
     sns.swarmplot(x='Celltype', y='Ratio', hue='Strand', data=df, color='k', \
@@ -52,7 +52,7 @@ def main():
     sns.despine()
     plt.ylabel('')
     plt.xlabel('')
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=90)
     plt.setp(ax.patches, linewidth=1)
     plt.ylim((0,1))
     ax.yaxis.set_major_formatter(PercentFormatter(1.0))
@@ -62,7 +62,7 @@ def main():
     for l in ax.get_xticklabels():
         geno = l.get_text()
         count = len(df[df.Celltype == geno])/2
-        xticklabels.append(geno.replace(' ', '\n') + f'\nN = {count:.0f}')
+        xticklabels.append(geno + f'\n(N = {count:.0f})')
     ax.set_xticklabels(xticklabels,fontsize=16)
     plt.savefig(args.o)
 
