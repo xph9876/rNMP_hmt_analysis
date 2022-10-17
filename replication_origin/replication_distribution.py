@@ -113,14 +113,14 @@ def draw_linecharts(data, out):
             sns.lineplot(x='Position', y='Moving_avg', hue='Region', hue_order=['Upstream', 'OriH', 'Downstream'],\
                 data=df_curr, ci="sd", palette=colors, ax=axs[i], legend=False)
             axs[i].set_xlim((0, cr2_e - cr2_s + cr1_e - cr1_s + 1))
-            axs[i].set_ylim((-0.95e-7, 6e-7))
+            axs[i].set_ylim((-0.95e-7, 8e-7))
             # tick locations
             locs = [16100-cr1_s, 16300-cr1_s, cr1_e-cr1_s, cr1_e+200-cr1_s, cr1_e+400-cr1_s]
             axs[i].xaxis.set_major_locator(ticker.FixedLocator(locs))
             if st == 'Light':
                 axs[i].set_xlabel('')
                 sns.despine(ax = axs[i])
-                axs[i].xaxis.set_ticklabels(['16100', '16300', '16569/0', '200', '400'])
+                axs[i].xaxis.set_ticklabels(['16100', '16300', '16569/1', '200', '400'])
             else:
                 axs[i].invert_yaxis()
                 axs[i].set_xlabel('Position')
@@ -132,9 +132,17 @@ def draw_linecharts(data, out):
         # highlight OriH region
         curlyBrace(
             fig, axs[0], 
-            p1=(cr1_e+oh_s-cr1_s, 2e-7), 
-            p2=(cr1_e+oh_e-cr1_s, 2e-7),
+            p1=(cr1_e+oh_s-cr1_s, 4e-7), 
+            p2=(cr1_e+oh_e-cr1_s, 4e-7),
             str_text='OriH',
+            color='black'
+        )
+        curlyBrace(
+            fig, axs[0], 
+            p1=(16106-cr1_s, 5.5e-7), 
+            p2=(cr1_e+191-cr1_s, 5.5e-7),
+            k_r=0.05,
+            str_text='D-loop',
             color='black'
         )
         # tick labels
