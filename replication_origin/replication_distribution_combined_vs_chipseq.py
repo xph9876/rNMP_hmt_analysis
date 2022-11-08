@@ -147,7 +147,7 @@ def draw_linecharts(df, chipseq, out, pal):
         1, 
         sharex=True, 
         gridspec_kw={'height_ratios':ratios}, 
-        figsize=(18,6), 
+        figsize=(18,8), 
         dpi=300
     )
     plt.subplots_adjust(left=0.03, top=0.92, right=0.75, bottom=0.08, hspace=0.12)
@@ -166,12 +166,16 @@ def draw_linecharts(df, chipseq, out, pal):
             axs[i].set_xlabel('')
             sns.despine(ax = axs[i])
             axs[i].xaxis.set_ticklabels([])
+            # add LSP
+            axs[i].plot((cr1_e + 407 - cr1_s, cr1_e + 407 - cr1_s), (0, 0.05e-7), 'k-')
         else:
             # axs[i].invert_yaxis()
             axs[i].xaxis.set_ticklabels([])
             axs[i].yaxis.get_offset_text().set_visible(False)
             # sns.despine(ax = axs[i], top=False, bottom=True)
             sns.despine(ax = axs[i])
+            # add HSP
+            axs[i].plot((cr1_e + 560 - cr1_s, cr1_e + 560 - cr1_s), (0, 0.05e-7), 'k-')
     axs[0].legend(loc=(1.02, -2))
     # draw chipseq data
     for i, gene in enumerate(genes):
@@ -193,16 +197,16 @@ def draw_linecharts(df, chipseq, out, pal):
     # highlight OriH region
     curlyBrace(
         fig, axs[0], 
-        p1=(cr1_e+oh_s-cr1_s, 1e-7), 
-        p2=(cr1_e+oh_e-cr1_s, 1e-7),
+        p1=(cr1_e+oh_s-cr1_s, 1.8e-7), 
+        p2=(cr1_e+oh_e-cr1_s, 1.8e-7),
         k_r = 0.05,
         str_text='OriH',
         color='black'
         )
     curlyBrace(
         fig, axs[0], 
-        p1=(16106-cr1_s, 2e-7), 
-        p2=(cr1_e+191-cr1_s, 2e-7),
+        p1=(16106-cr1_s, 3e-7), 
+        p2=(cr1_e+191-cr1_s, 3e-7),
         k_r=0.03,
         str_text='D-loop',
         color='black'
@@ -224,8 +228,8 @@ def main():
     parser.add_argument('-o', default='mt_cr', help='Output basename')
     parser.add_argument('--same', type=argparse.FileType('r'), nargs='+', help='Bed files on the same strand of MT-CR')
     parser.add_argument('--oppo', type=argparse.FileType('r'), nargs='+', help='Bed files on the opposite strand of MT-CR')
-    parser.add_argument('--selected', default=['CD4T', 'hESC-H9','DLTB', 'TLTB', 'HEK293T'], nargs='+', help='Selected genotypes, (All WT > 3)')
-    parser.add_argument('--palette', default='Set2', help='Color paletter used to generate plots, (Set2)')
+    parser.add_argument('--selected', default=['CD4T', 'hESC-H9','DLTB', 'TLTB', 'WB-GTP control', 'WB-GTP PTSD', 'HCT116', 'HEK293T'], nargs='+', help='Selected genotypes, (All WT > 3)')
+    parser.add_argument('--palette', default='Dark2', help='Color paletter used to generate plots, (Dark2)')
     args = parser.parse_args()
 
     assert len(args.same) == len(args.oppo) and len(args.same) >=1, 'There should be at least one pair of same/oppo bed files'

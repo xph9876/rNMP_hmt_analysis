@@ -111,32 +111,36 @@ def draw_linecharts(df, out, pal):
             df_curr = df[(df.Strand == st) & (df.Celltype == geno)]
             axs[i].plot(df_curr.Position, df_curr.Moving_avg, color=colors[geno], label=geno)
         axs[i].set_xlim((0, cr2_e - cr2_s + cr1_e - cr1_s + 1))
-        axs[i].set_ylim((0, 3.5e-7))
+        axs[i].set_ylim((0, 3.7e-7))
         locs = [16100-cr1_s, 16300-cr1_s, cr1_e-cr1_s, cr1_e+200-cr1_s, cr1_e+400-cr1_s]
         axs[i].xaxis.set_major_locator(ticker.FixedLocator(locs))
         if st == 'Light':
             axs[i].set_xlabel('')
             sns.despine(ax = axs[i])
             axs[i].xaxis.set_ticklabels(['16100', '16300', '16569/1', '200', '400'])
+            # add LSP
+            axs[i].plot((cr1_e + 407 - cr1_s, cr1_e + 407 - cr1_s), (0, 0.05e-7), 'k-')
         else:
             axs[i].invert_yaxis()
             axs[i].set_xlabel('Position')
             axs[i].xaxis.set_ticklabels([])
             axs[i].yaxis.get_offset_text().set_visible(False)
             sns.despine(ax = axs[i], top=False, bottom=True)
+            # add HSP
+            axs[i].plot((cr1_e + 560 - cr1_s, cr1_e + 560 - cr1_s), (0, 0.05e-7), 'k-')
     plt.legend(loc=(1.02, 0.2))
     # highlight OriH region
     curlyBrace(
         fig, axs[0], 
-        p1=(cr1_e+oh_s-cr1_s, 1.5e-7), 
-        p2=(cr1_e+oh_e-cr1_s, 1.5e-7),
+        p1=(cr1_e+oh_s-cr1_s, 1.6e-7), 
+        p2=(cr1_e+oh_e-cr1_s, 1.6e-7),
         str_text='OriH',
         color='black'
         )
     curlyBrace(
         fig, axs[0], 
-        p1=(16106-cr1_s, 2.9e-7), 
-        p2=(cr1_e+191-cr1_s, 2.9e-7),
+        p1=(16106-cr1_s, 3.1e-7), 
+        p2=(cr1_e+191-cr1_s, 3.1e-7),
         k_r=0.05,
         str_text='D-loop',
         color='black'
@@ -156,8 +160,8 @@ def main():
     parser.add_argument('-o', default='mt_cr', help='Output basename')
     parser.add_argument('--same', type=argparse.FileType('r'), nargs='+', help='Bed files on the same strand of MT-CR')
     parser.add_argument('--oppo', type=argparse.FileType('r'), nargs='+', help='Bed files on the opposite strand of MT-CR')
-    parser.add_argument('--selected', default=['CD4T', 'hESC-H9','HEK293T','DLTB', 'TLTB'], nargs='+', help='Selected genotypes, (All WT > 3)')
-    parser.add_argument('--palette', default='Set1', help='Color paletter used to generate plots, (Set1)')
+    parser.add_argument('--selected', default=['CD4T', 'hESC-H9','DLTB', 'TLTB', 'WB-GTP control', 'WB-GTP PTSD', 'HCT116', 'HEK293T'], nargs='+', help='Selected genotypes, (All WT > 3)')
+    parser.add_argument('--palette', default='Dark2', help='Color paletter used to generate plots, (Set1)')
     args = parser.parse_args()
 
     assert len(args.same) == len(args.oppo) and len(args.same) >=1, 'There should be at least one pair of same/oppo bed files'

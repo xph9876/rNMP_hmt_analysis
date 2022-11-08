@@ -111,7 +111,7 @@ def draw_linecharts(data, out):
         for i, st in enumerate(['Light', 'Heavy']):
             df_curr = df[df.Strand == st]
             sns.lineplot(x='Position', y='Moving_avg', hue='Region', hue_order=['Upstream', 'OriH', 'Downstream'],\
-                data=df_curr, ci="sd", palette=colors, ax=axs[i], legend=False)
+                data=df_curr, errorbar='sd', palette=colors, ax=axs[i], legend=False)
             axs[i].set_xlim((0, cr2_e - cr2_s + cr1_e - cr1_s + 1))
             axs[i].set_ylim((-0.95e-7, 8e-7))
             # tick locations
@@ -121,12 +121,16 @@ def draw_linecharts(data, out):
                 axs[i].set_xlabel('')
                 sns.despine(ax = axs[i])
                 axs[i].xaxis.set_ticklabels(['16100', '16300', '16569/1', '200', '400'])
+                # add LSP
+                axs[i].plot((cr1_e + 407 - cr1_s, cr1_e + 407 - cr1_s), (-0.95e-7, -0.93e-7), 'k-')
             else:
                 axs[i].invert_yaxis()
                 axs[i].set_xlabel('Position')
                 axs[i].xaxis.set_ticklabels([])
                 axs[i].yaxis.get_offset_text().set_visible(False)
                 sns.despine(ax = axs[i], top=False, bottom=True)
+                # add HSP
+                axs[i].plot((cr1_e + 560 - cr1_s, cr1_e + 560 - cr1_s), (-0.95e-7, -0.93e-7), 'k-')
             # y label
             axs[i].set_ylabel(f'{st} PPB')
         # highlight OriH region

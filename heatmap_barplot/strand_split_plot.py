@@ -5,6 +5,7 @@ import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import PercentFormatter
+from statannotations.Annotator import Annotator
 
 
 def get_category(data):
@@ -15,6 +16,8 @@ def main():
     parser = argparse.ArgumentParser(description='Generate barplot with strand split file')
     parser.add_argument('fwd', type=argparse.FileType('r'), help='rNMP count for forward strand')
     parser.add_argument('rev', type=argparse.FileType('r'), help='rNMP count for reverse strand')
+    parser.add_argument('-l', type=float, default=7, help='Width of the figure, (7)')
+    parser.add_argument('--no_annot', action='store_true', help='Do not draw statistical annotations')
     parser.add_argument('-o', help='Output plot name')
     args = parser.parse_args()
 
@@ -40,7 +43,7 @@ def main():
 
     # draw
     sns.set(font_scale=1.5, style='ticks')
-    fig, ax = plt.subplots(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(args.l,6), dpi=300)
     plt.subplots_adjust(left=0.16, right=1, top=0.98, bottom=0.4)
     sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=df, palette=pal,\
         capsize=0.3, errwidth=1.2, ax=ax)
@@ -52,10 +55,21 @@ def main():
     sns.despine()
     plt.ylabel('')
     plt.xlabel('')
-    plt.xticks(rotation=90)
     plt.setp(ax.patches, linewidth=1)
     plt.ylim((0,1))
     ax.yaxis.set_major_formatter(PercentFormatter(1.0))
+
+    if not args.no_annot:
+        # draw annotations
+        pairs = []
+        counts = df.groupby('Celltype').Ratio.count()
+        for k, v in counts.to_dict().items():
+            if v >= 6:
+                pairs.append(((k, 'Forward'), (k, 'Reverse')))
+        annot = Annotator(ax, pairs, data=df, x='Celltype', y='Ratio', hue='Strand')
+        annot.configure(test='t-test_ind', verbose=2)
+        annot.apply_test()
+        annot.annotate()
 
     # tick labels
     xticklabels = []
@@ -63,7 +77,8 @@ def main():
         geno = l.get_text()
         count = len(df[df.Celltype == geno])/2
         xticklabels.append(geno + f'\n(N = {count:.0f})')
-    ax.set_xticklabels(xticklabels,fontsize=16)
+    rotation = 70 if args.l < 10 else 0
+    ax.set_xticklabels(xticklabels,fontsize=16, rotation=rotation)
     plt.savefig(args.o)
 
     print('Done!')

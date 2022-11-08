@@ -6,6 +6,7 @@ import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
+from statannotations.Annotator import Annotator
 
 # read celltypes
 def read_celltypes(fr):
@@ -50,25 +51,45 @@ def load_data(same, oppo, celltypes, celltype_list):
     return df
 
 # draw barplot
-def draw_barplot(data, out):
+def draw_barplot(data, out, annotation):
     colors = {'Light':'#FB5156', 'Heavy':'#5555FF'}
     sns.set(style='ticks', font_scale=1.5)
-    fig, ax = plt.subplots(figsize=(15,6))
+    fig, ax = plt.subplots(figsize=(15,6), dpi=300)
     plt.subplots_adjust(left=0.06, top=0.92, right=0.99, bottom=0.2)
-    sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=data, ci="sd", errwidth=2, \
+    sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=data, errorbar='sd', errwidth=2, \
         capsize=0.2, palette=colors, ax=ax)
     sns.swarmplot(x='Celltype', y='Ratio', hue='Strand', data=data, dodge=True, \
         color='k', ax=ax)
     plt.legend().set_visible(False)
     sns.despine()
     plt.ylim([0,1.05])
+
+    # draw annotations
+    if annotation:
+        pairs = []
+        counts = data.groupby('Celltype').Ratio.count()
+        for k, v in counts.to_dict().items():
+            if v >= 6:
+                pairs.append(((k, 'Light'), (k, 'Heavy')))
+        annot = Annotator(ax, pairs, data=data, x='Celltype', y='Ratio', hue='Strand')
+        annot.configure(test='t-test_ind', verbose=2)
+        annot.apply_test()
+        annot.annotate()
+
     # tick labels
-    labels = [x.get_text().replace(' ','\n') for x in ax.get_xticklabels()]
-    ax.set_xticklabels(labels)
-    ax.set_xlabel('Cell type')
-    ax.set_ylabel('Ratio')
+    xticklabels = []
+    for l in ax.get_xticklabels():
+        geno = l.get_text()
+        count = len(data[data.Celltype == geno])/2
+        xticklabels.append(geno.replace(' ', '\n') + f'\n(N = {count:.0f})')
+    ax.set_xticklabels(xticklabels)
+
+    # labels
+    plt.xlabel('')
+    plt.ylabel('')
 
     fig.savefig(f'{out}_barplot.png')
+
 
 def main():
     # argparse
@@ -77,6 +98,7 @@ def main():
     parser.add_argument('oppo', type=argparse.FileType('r'), help='Raw composition file for the opposite strand')
     parser.add_argument('celltypes', type=argparse.FileType('r'), help='List of library informations')
     parser.add_argument('-o', default='out', help='Output figure basename')
+    parser.add_argument('--no_annot', action='store_true', help='Do not draw statistical annotations')
     args = parser.parse_args()
 
     # annotations for each cell types
@@ -86,7 +108,7 @@ def main():
     data = load_data(args.same, args.oppo, celltypes, celltype_list)
 
     # output plots
-    draw_barplot(data, args.o)
+    draw_barplot(data, args.o, not args.no_annot)
 
     print('Done!')
 
