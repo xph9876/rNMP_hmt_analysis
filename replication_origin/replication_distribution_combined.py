@@ -97,14 +97,17 @@ def load_bed(same, oppo, total, flank):
 
 
 # draw histogram
-def draw_linecharts(df, out, pal):
+def draw_linecharts(df, out, pal, draw_legend=False):
     colors = {x:sns.color_palette(pal)[i] for i, x in enumerate(df.Celltype.unique())}
     global oh_s, oh_r, cr1_s, cr1_e, cr2_s, cr2_e
     sns.set(style='ticks', font_scale=2)
     df = df.sort_values(by='Position')
     df.to_csv(f'{out}.csv')
     fig, axs = plt.subplots(2,1, figsize=(12,8),dpi=300)
-    plt.subplots_adjust(left=0.05, top=0.92, right=0.7, bottom=0.05, hspace=0.18)
+    if draw_legend:
+        plt.subplots_adjust(left=0.05, top=0.92, right=0.7, bottom=0.05, hspace=0.18)
+    else:
+        plt.subplots_adjust(left=0.05, top=0.92, right=0.95, bottom=0.05, hspace=0.18)
     # draw heavy and light separately
     for i, st in enumerate(['Light', 'Heavy']):
         for geno in df.Celltype.unique():
@@ -128,7 +131,10 @@ def draw_linecharts(df, out, pal):
             sns.despine(ax = axs[i], top=False, bottom=True)
             # add HSP
             axs[i].plot((cr1_e + 560 - cr1_s, cr1_e + 560 - cr1_s), (0, 0.05e-7), 'k-')
-    plt.legend(loc=(1.02, 0.2))
+    if draw_legend:
+        plt.legend(loc=(1.02, 0.2))
+    else:
+        plt.legend('',frameon=False)
     # highlight OriH region
     curlyBrace(
         fig, axs[0], 
@@ -162,6 +168,7 @@ def main():
     parser.add_argument('--oppo', type=argparse.FileType('r'), nargs='+', help='Bed files on the opposite strand of MT-CR')
     parser.add_argument('--selected', default=['CD4T', 'hESC-H9','DLTB', 'TLTB', 'WB-GTP control', 'WB-GTP PTSD', 'HCT116', 'HEK293T'], nargs='+', help='Selected genotypes, (All WT > 3)')
     parser.add_argument('--palette', default='Dark2', help='Color paletter used to generate plots, (Set1)')
+    parser.add_argument('--draw_legend', action='store_true', help='Draw figure legend')
     args = parser.parse_args()
 
     assert len(args.same) == len(args.oppo) and len(args.same) >=1, 'There should be at least one pair of same/oppo bed files'
@@ -181,7 +188,7 @@ def main():
     ppb = ppb.groupby(['Celltype', 'Strand', 'Position', 'Region']).mean().reset_index()
 
     # output plots
-    draw_linecharts(ppb, args.o, args.palette)
+    draw_linecharts(ppb, args.o, args.palette, args.draw_legend)
 
     print('Done!')
 

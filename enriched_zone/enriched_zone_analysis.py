@@ -116,13 +116,13 @@ def draw(
     data = data.sort_values(by=['order','Sample'])
     # initialize figures
     for st in ['+', '-']:
-        sns.set(style='ticks', font_scale=2.25)
+        sns.set(style='ticks', font_scale=5)
         if draw_legend:
             fig, _ = plt.subplots(figsize=(15,10), dpi=300)
             plt.subplots_adjust(left=0, right=0.7)
         else:
             fig, _ = plt.subplots(figsize=(10,10), dpi=300)
-            margin = 0.05
+            margin = 0.07
             plt.subplots_adjust(left=margin, right=1-margin, top=1-margin, bottom=margin)
         ax = plt.subplot(111, polar=True)
         # calc width and angles
@@ -153,15 +153,15 @@ def draw(
                 loc = angles[x.Start//bin] + width / 2
                 r_marker = loc * 360 / (2 * np.pi)
                 ax.scatter(
-                    [loc], [i+2], 
-                    marker=(3, 0, -r_marker+180), color='k', s=120
+                    [loc], [i+4], 
+                    marker=(3, 0, -r_marker+180), color='k', s=500
                 )
         # theta ticks
         ax.xaxis.set_tick_params(size=2, width=2)
         ax.set_xticks([x*tick_interval*2*np.pi/size for x in range(size//tick_interval+1)])
         ax.set_xticklabels([int(x*tick_interval/1000) for x in range(size//tick_interval+1)])
         # limits
-        plt.ylim((-0.5*i, 1.15*i))
+        plt.ylim((-0.5*i, 1.25*i))
         ax.set_rorigin(-0.5*i)
         # plot a line for zero
         ax.plot([0]*50, np.linspace(0, i*1.1, 50), 'k', linewidth=2)
@@ -195,8 +195,8 @@ def main():
     parser.add_argument('-c', type=int, default=2, help='Col num for FS number, default=2')
     parser.add_argument('-b', type=int, default=200, help='Bin size, default=200nt')
     parser.add_argument('-t', type=int, default=2000, help='Tick interval, default=2,000nt')
-    parser.add_argument('--ef_threshold', type=float, default=1, help='Enrichment factor threshold for enriched regions, default=1')
-    parser.add_argument('--sample_threshold', type=float, default=0.85, help='The minimum library ratio threshold of common enriched regions, default=0.85')
+    parser.add_argument('--ef_threshold', type=float, default=2, help='Enrichment factor threshold for enriched regions, default=2')
+    parser.add_argument('--sample_threshold', type=float, default=0.8, help='The minimum library ratio threshold of common enriched regions, default=0.8')
     parser.add_argument('--mt_name', default='chrM', help='Mitochondria name in reference genome, default=chrM')
     parser.add_argument('--selected', default=None, nargs='+', help='Selected paricular cell type(s)')
     parser.add_argument('--order', default=['CD4T', 'hESC-H9','DLTB', 'TLTB', 'WB-GTP control', 'WB-GTP PTSD', 'HCT116', 'HEK293T'], nargs='+', help='Order in hue')
