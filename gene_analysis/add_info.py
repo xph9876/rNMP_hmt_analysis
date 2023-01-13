@@ -75,6 +75,8 @@ def main():
         values = []
         for cds, v2 in cds_info.items():
             gene_len = int(v2[2])-int(v2[1])
+            if (lib, cds) not in data:
+                continue
             count = float(data[(lib, cds)])
             rpb = count/gene_len
             ppb = rpb/mito_count[lib]

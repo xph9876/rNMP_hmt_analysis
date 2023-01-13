@@ -10,7 +10,6 @@ def main():
     parser.add_argument('-l', type=int, default=16569, help='chrM length (16,569 nt)')
     args = parser.parse_args()
 
-    args.l += 1
     # load all rNMPs
     data = []
     for l in args.bed:
@@ -18,7 +17,7 @@ def main():
         if len(ws) < 6:
             continue
         ws[1] = int(ws[1]) % args.l
-        ws[2] = int(ws[2]) % args.l
+        ws[2] = ws[1] + 1
         data.append(ws)
     
     # output

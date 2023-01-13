@@ -42,7 +42,7 @@ def main():
     xlabel_texts = [f'{geno_dict[x]}-{x}' for x in libs]
 
     for fea in ["Count_rank","RPB_rank",'PPB']:
-        data = df.pivot("Gene_name", "Library", fea)
+        data = df.pivot(index="Gene_name", columns="Library", values=fea)
         # sort
         data = data.loc[gene_names, libs]
         # set color settings for graph

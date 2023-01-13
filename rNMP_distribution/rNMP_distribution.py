@@ -89,7 +89,7 @@ def draw(data, size, bin, out, tick_interval=2000, scale_pos=1.1*np.pi):
 
 def main():
     # argparse
-    parser = argparse.ArgumentParser(description='Draw circular barplot for rNMP incorporation in mitonchondrial dNA')
+    parser = argparse.ArgumentParser(description='Draw circular barplot for rNMP incorporation in mitonchondrial DNA')
     parser.add_argument('bed', type=argparse.FileType('r'), help='rNMP incorporation bed file')
     parser.add_argument('fai', type=argparse.FileType('r'), help='Fasta index file')
     parser.add_argument('-o', default='mt.png', help='Output figure name, (mt.png)')

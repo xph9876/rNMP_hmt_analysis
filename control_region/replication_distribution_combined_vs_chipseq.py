@@ -249,7 +249,7 @@ def main():
     # add annotations
     ppb['Celltype'] = ppb['Library'].map(celltypes)
     ppb = ppb[ppb.Celltype.isin(args.selected)].dropna().copy()
-    ppb = ppb.groupby(['Celltype', 'Strand', 'Position', 'Region']).mean().reset_index()
+    ppb = ppb.groupby(['Celltype', 'Strand', 'Position', 'Region']).mean(numeric_only=True).reset_index()
 
     # output plots
     draw_linecharts(ppb, chipseq, args.o, args.palette)

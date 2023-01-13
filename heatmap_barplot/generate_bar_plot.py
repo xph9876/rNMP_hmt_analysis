@@ -44,9 +44,9 @@ def main():
     fig, ax = plt.subplots(figsize=(15,6))
     plt.subplots_adjust(left=0.06, right=1, top=0.98, bottom=0.2)
     sns.barplot(x='Genotype', y='Values', hue='rNMP', data=df, palette=pal,\
-            ci='sd', errwidth=1.2, capsize=0.12, edgecolor='k',linewidth=1.5,ax=ax)
+            errorbar='sd', errwidth=1.2, capsize=0.12, edgecolor='k',linewidth=1.5,ax=ax)
     sns.swarmplot(x='Genotype', y='Values', hue='rNMP', data=df, dodge=True,\
-            color='black', ax=ax)
+            palette='dark:black', ax=ax)
     sns.despine()
     plt.ylim((0,1))
     plt.ylabel('')

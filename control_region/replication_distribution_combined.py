@@ -185,7 +185,8 @@ def main():
     # add annotations
     ppb['Celltype'] = ppb['Library'].map(celltypes)
     ppb = ppb[ppb.Celltype.isin(args.selected)].dropna().copy()
-    ppb = ppb.groupby(['Celltype', 'Strand', 'Position', 'Region']).mean().reset_index()
+    ppb = ppb.groupby(['Celltype', 'Strand', 'Position', 'Region']).mean(numeric_only=True).reset_index()
+    ppb.to_csv('test.csv')
 
     # output plots
     draw_linecharts(ppb, args.o, args.palette, args.draw_legend)

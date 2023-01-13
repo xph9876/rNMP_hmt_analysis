@@ -14,6 +14,8 @@ def read_celltypes(fr):
     celltypes = []
     for l in fr:
         ws = l.rstrip('\n').split('\t')
+        if ws[0] == 'Control':
+            continue
         if len(ws) == 2:
             data[ws[1]] = ws[0]
         if not celltypes or celltypes[-1] != ws[0]:
@@ -54,12 +56,12 @@ def load_data(same, oppo, celltypes, celltype_list):
 def draw_barplot(data, out, annotation):
     colors = {'Light':'#FB5156', 'Heavy':'#5555FF'}
     sns.set(style='ticks', font_scale=1.5)
-    fig, ax = plt.subplots(figsize=(6,6), dpi=300)
-    plt.subplots_adjust(left=0.06, top=0.92, right=0.99, bottom=0.2)
-    sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=data, errorbar='sd', errwidth=2, \
-        capsize=0.2, palette=colors, ax=ax)
+    fig, ax = plt.subplots(figsize=(7,6), dpi=300)
+    plt.subplots_adjust(left=0.16, top=0.98, right=1, bottom=0.4)
+    sns.barplot(x='Celltype', y='Ratio', hue='Strand', data=data, errorbar='sd', errwidth=1.2, \
+        capsize=0.3, palette=colors, ax=ax)
     sns.swarmplot(x='Celltype', y='Ratio', hue='Strand', data=data, dodge=True, \
-        color='k', ax=ax)
+        color='k', size=3.5, ax=ax)
     plt.legend().set_visible(False)
     sns.despine()
     plt.ylim([0,1.05])
@@ -82,7 +84,7 @@ def draw_barplot(data, out, annotation):
         geno = l.get_text()
         count = len(data[data.Celltype == geno])/2
         xticklabels.append(geno.replace(' ', '\n') + f'\n(N = {count:.0f})')
-    ax.set_xticklabels(xticklabels)
+    ax.set_xticklabels(xticklabels, fontsize=12, rotation=70)
 
     # labels
     plt.xlabel('')

@@ -70,7 +70,7 @@ def main():
     sns.set(font_scale=1.5, style='ticks')
     fig, ax = plt.subplots(figsize=(6, 6))
     plt.subplots_adjust(left=0.1, top=0.98, bottom=0.4, right=0.98)
-    sns.barplot(x='Gene_name', y='Enrichment_factor', ci='sd', data=df, \
+    sns.barplot(x='Gene_name', y='Enrichment_factor', errorbar='sd', data=df, \
         errwidth=1.3, capsize=0.3, ax=ax, palette=gene_colors)
     sns.stripplot(x='Gene_name', y='Enrichment_factor', dodge=True, color='black', size=2, data=df, ax=ax)
     sns.despine()

@@ -22,7 +22,7 @@ def main():
     genes = df.Gene_name.unique()
 
     # normalization on baseline
-    base = df.groupby(['Library']).mean().reset_index()[['Library', 'PPB']]
+    base = df.groupby(['Library']).mean(numeric_only=True).reset_index()[['Library', 'PPB']]
     df = df.merge(base, left_on='Library', right_on='Library', how='left', suffixes=('','_baseline'))
     df['PPB_norm'] = df['PPB']/df['PPB_baseline']
 
