@@ -7,6 +7,7 @@ bed_folder=$3
 order=$4
 mito_count=$5
 ref_bed="$1/ref_bed"
+control_bed="$1/control_bed"
 
 for aa in intersect raw info plots
 do
@@ -35,6 +36,7 @@ do
     fi
 done
 
+cp $control_bed/RD*.bed $bed_folder
 for aa in $(ls $bed_folder)
 do
     for ty in cds noncoding random
@@ -109,3 +111,6 @@ do
     done
 done
 wait
+
+# remove random bed files
+rm $bed_folder/RD1.bed $bed_folder/RD2.bed $bed_folder/RD3.bed -f

@@ -12,6 +12,13 @@ if [ ! -d $output ]
 then
     mkdir $output
 fi
+
+# Remove plots folder
+if [ -d $output/plots ]
+then
+    rm -rf $output/plots
+fi
+
 for folder in heatmap_barplot logs enriched_zone control_region_figures gene_analysis plots bed_split strand_split
 do
     if ! [ -d $output/$folder ]
@@ -25,6 +32,8 @@ done
 curr=$(pwd)
 cd $bed_folder
 wc -l *.bed | grep -v total | sed 's/.bed//;s/^ *//;s/ /\t/' | awk 'BEGIN{OFS="\t"}{print $2,$1}' > $output/mito_count.tsv
+cd $scripts/gene_analysis/control_bed
+wc -l *.bed | grep -v total | sed 's/.bed//;s/^ *//;s/ /\t/' | awk 'BEGIN{OFS="\t"}{print $2,$1}' >> $output/mito_count.tsv
 cd $curr
 
 # Generate strand split bed files
@@ -48,14 +57,14 @@ eval $scripts/enriched_zone/enriched_zone_analysis.py $bed_folder/*.bed $scripts
 eval $wrapper/control_region_figures.sh $RibosePreferenceAnalysis $scripts/control_region $output/control_region_figures $bed_folder $order $output/mito_count.tsv $scripts/refseq/hg38_chrM.fa 2>&1 > $output/logs/control_region_figures.log &
 
 # Perform gene analysis
-eval $wrapper/gene_analysis.sh $scripts/gene_analysis $output/gene_analysis $bed_folder $order $output/mito_count.tsv > $output/logs/gene_analysis.log &
+eval $wrapper/gene_analysis.sh $scripts/gene_analysis $output/gene_analysis $bed_folder $scripts/gene_analysis/order_human.tsv $output/mito_count.tsv > $output/logs/gene_analysis.log &
 
 wait
 
 for folder in heatmap_barplot control_region_figures gene_analysis strand_split
 do
-    mv $output/$folder/plots $output/plots/$folder -f
+    mv $output/$folder/plots $output/plots/$folder
 done
-mv $output/enriched_zone $output/plots/enriched_zone -f
+mv $output/enriched_zone $output/plots/enriched_zone
 
 echo 'Done!'

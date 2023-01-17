@@ -93,17 +93,17 @@ def draw(
         ax.set_xticks([x*tick_interval*2*np.pi/size for x in range(size//tick_interval+1)])
         ax.set_xticklabels([int(x*tick_interval/1000) for x in range(size//tick_interval+1)])
         # limits
-        ax.set_ylim([0, 3])
-        ax.set_rorigin(-3)
+        ax.set_ylim([0, 2.3])
+        ax.set_rorigin(-6)
         # plot a line for 0 and 1
         nspikes = 100
         ax.plot(np.linspace(0, 2*np.pi, nspikes), [0]*nspikes, 'k', linewidth=2)
         ax.plot(np.linspace(0, 2*np.pi, nspikes), [1]*nspikes, 'k--', linewidth=1)
         # plot ticks
-        ax.plot([0]*5, np.linspace(0, 3, 5), 'k', linewidth=2)
+        ax.plot([0]*5, np.linspace(0, 2, 5), 'k', linewidth=2)
         for x in range(1, size//tick_interval+1):
             loc = x * tick_interval * np.pi * 2 / size
-            ax.plot((loc, loc), (0, 3), color='k', linewidth=1)
+            ax.plot((loc, loc), (0, 2), color='k', linewidth=1)
         # plot position
         ax.set_theta_zero_location('N')
         ax.set_theta_direction(-1)
@@ -116,9 +116,9 @@ def draw(
         # other settings
         ax.grid(False)
         ax.yaxis.set_visible(False)
-        fig.savefig(f'{out}_{st}.png', transparent=True)
         ax.set_xlabel('')
         ax.set_ylabel('')
+        fig.savefig(f'{out}_{st}.png', transparent=True)
         plt.close('all')
 
 

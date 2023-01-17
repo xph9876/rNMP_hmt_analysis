@@ -159,7 +159,7 @@ def draw_linecharts(df, chipseq, out, pal):
                 continue
             axs[i].plot(df_curr.Position, df_curr.Moving_avg, color=colors[geno], label=geno)
         axs[i].set_xlim((0, cr2_e - cr2_s + cr1_e - cr1_s + 1))
-        axs[i].set_ylim((0, 3.8e-7))
+        axs[i].set_ylim((0, 4.8e-7))
         locs = [16100-cr1_s, 16300-cr1_s, cr1_e-cr1_s, cr1_e+200-cr1_s, cr1_e+400-cr1_s]
         axs[i].xaxis.set_major_locator(ticker.FixedLocator(locs))
         if st == 'Light':
@@ -205,8 +205,8 @@ def draw_linecharts(df, chipseq, out, pal):
         )
     curlyBrace(
         fig, axs[0], 
-        p1=(16106-cr1_s, 3e-7), 
-        p2=(cr1_e+191-cr1_s, 3e-7),
+        p1=(16106-cr1_s, 3.9e-7), 
+        p2=(cr1_e+191-cr1_s, 3.9e-7),
         k_r=0.03,
         str_text='D-loop',
         color='black'
