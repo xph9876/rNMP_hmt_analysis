@@ -103,7 +103,8 @@ def get_rez(ef, threshold, sample_threshold):
 # draw circular plot for REZ
 def draw(
         data, common, size, bin, out, order, palette, 
-        tick_interval=2000, scale_pos=np.pi, draw_legend=False, no_annot=False
+        tick_interval=2000, scale_pos=np.pi, draw_legend=False, no_annot=False,
+        show_loc=False
     ):
     # sort and assign colors
     for c in data.Celltype.unique():
@@ -179,6 +180,8 @@ def draw(
         # other settings
         ax.grid(False)
         ax.yaxis.set_visible(False)
+        if not show_loc:
+            ax.xaxis.set_visible(False)
         st_name = 'light' if st == '+' else 'heavy'
         fig.savefig(f'{out}_REZ_{st_name}.png')
         plt.close('all')
@@ -203,6 +206,7 @@ def main():
     parser.add_argument('--palette', default='Dark2', help='Color paletter used to generate plots, (Dark2)')
     parser.add_argument('--legend', action='store_true', help='Draw legend')
     parser.add_argument('--no_annot', action='store_true', help='Do not annotate common REZs')
+    parser.add_argument('--show_loc', action='store_true', help='Draw location indicators')
     args = parser.parse_args()
     args.c -= 1
 
@@ -223,7 +227,8 @@ def main():
     # draw
     draw(
         rezs, common, size, args.b, args.o, args.order, args.palette, 
-        tick_interval=args.t, draw_legend=args.legend, no_annot=args.no_annot
+        tick_interval=args.t, draw_legend=args.legend, no_annot=args.no_annot,
+        show_loc=args.show_loc
     )
 
     print('Done!')
