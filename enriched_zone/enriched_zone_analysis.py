@@ -50,7 +50,7 @@ def load_bed(bed, size, info, bin, name, selected):
                 b = size % bin
             else:
                 b = bin
-            data[fs][st][loc//bin] += 1/ (b/size/2)
+            data[fs][st][loc//bin] += 1/ (b/size)
     df = []
     for fs, v in data.items():
         for st, efs in v.items():
