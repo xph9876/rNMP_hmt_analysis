@@ -29,7 +29,7 @@ done
 
 
 # generate intersect
-for file in $(ls $bed_folder | grep FS)
+for file in $(ls $bed_folder | grep -v RD)
 do
     bedtools intersect -a $bg/same.bed -b $bed_folder/${file} -s > $output/bed_same/$file &
     bedtools intersect -a $bg/oppo.bed -b $bed_folder/${file} -s > $output/bed_oppo/$file &

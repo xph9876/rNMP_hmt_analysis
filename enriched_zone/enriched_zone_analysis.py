@@ -198,7 +198,7 @@ def main():
     parser.add_argument('-c', type=int, default=2, help='Col num for FS number, default=2')
     parser.add_argument('-b', type=int, default=200, help='Bin size, default=200nt')
     parser.add_argument('-t', type=int, default=2000, help='Tick interval, default=2,000nt')
-    parser.add_argument('--ef_threshold', type=float, default=2, help='Enrichment factor threshold for enriched regions, default=2')
+    parser.add_argument('--ef_threshold', type=float, default=1, help='Enrichment factor threshold for enriched regions, default=1')
     parser.add_argument('--sample_threshold', type=float, default=0.8, help='The minimum library ratio threshold of common enriched regions, default=0.8')
     parser.add_argument('--mt_name', default='chrM', help='Mitochondria name in reference genome, default=chrM')
     parser.add_argument('--selected', default=None, nargs='+', help='Selected paricular cell type(s)')
