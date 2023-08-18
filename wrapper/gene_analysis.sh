@@ -1,15 +1,18 @@
 #!/bin/bash
 
-# usage gene_analysis.sh <gene_analysis folder> <output folder> <bed folder> <order> <mito_count>
+# usage gene_analysis.sh <gene_analysis folder> <heatmap script> <output folder> <bed folder> <order> <mito_count>
 scripts=$1
-output=$2
-bed_folder=$3
-order=$4
-mito_count=$5
+heatmap=$2
+output=$3
+bed_folder=$4
+order=$5
+mito_count=$6
 ref_bed="$1/ref_bed"
+ref="$1/ref"
 control_bed="$1/control_bed"
+genome="$1/../refseq/hg38_chrM.fa"
 
-for aa in intersect raw info plots
+for aa in intersect raw info plots cg
 do
     if ! [ -d $output/$aa ]
     then
@@ -28,7 +31,7 @@ do
     done
 done
 
-for aa in heatmap barplot regplot
+for aa in heatmap barplot regplot regplot_cg
 do
     if ! [ -d $output/plots/$aa ]
     then
@@ -77,16 +80,6 @@ for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $scripts/add_info.py $output/raw/${ty}_${st}.raw $order $scripts/ref/${ty}.gtf $mito_count -c 2 -o $output/info/${ty}_${st}.tsv &   
-    done
-done
-wait
-
-# draw heatmap
-for st in template nontemplate
-do
-    for ty in cds noncoding random
-    do
         eval $scripts/draw_heatmap.py $output/info/${ty}_${st}.tsv --no_cbar -o $output/plots/heatmap/${ty}_${st} &   
     done
 done
@@ -114,3 +107,11 @@ wait
 
 # remove random bed files
 rm $bed_folder/RD1.bed $bed_folder/RD2.bed $bed_folder/RD3.bed -f
+
+# Correlation between CG count to PPB
+bedtools getfasta -fi $genome -bed $ref/hg38_mt_cds_ensembl.bed -fo $output/cg/cds.fa -s
+eval $heatmap/count_background.py $output/cg/cds.fa --mono -s -o $output/cg/cds_mono.tsv 
+eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -o $output/cg/cds_nontemplate.tsv
+eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate &
+
+

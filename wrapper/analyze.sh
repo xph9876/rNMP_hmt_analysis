@@ -2,9 +2,9 @@
 
 RibosePreferenceAnalysis='/storage/home/hcoda1/0/pxu64/bio-storici/scripts/RibosePreferenceAnalysis'
 scripts='/storage/home/hcoda1/0/pxu64/bio-storici/scripts/rNMP_hmt_analysis'
-bed_folder='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt_new/bed'
-order='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt_new/order_human.tsv'
-output='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt_new/results'
+bed_folder='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt/bed'
+order='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt/order_human.tsv'
+output='/storage/home/hcoda1/0/pxu64/bio-storici/human_mt/results'
 wrapper="$scripts/wrapper"
 
 # make folders
@@ -57,7 +57,7 @@ eval $scripts/enriched_zone/enriched_zone_analysis.py $bed_folder/*.bed $scripts
 eval $wrapper/control_region_figures.sh $RibosePreferenceAnalysis $scripts/control_region $output/control_region_figures $bed_folder $order $output/mito_count.tsv $scripts/refseq/hg38_chrM.fa 2>&1 > $output/logs/control_region_figures.log &
 
 # Perform gene analysis
-eval $wrapper/gene_analysis.sh $scripts/gene_analysis $output/gene_analysis $bed_folder $scripts/gene_analysis/order_human.tsv $output/mito_count.tsv > $output/logs/gene_analysis.log &
+eval $wrapper/gene_analysis.sh $scripts/gene_analysis $RibosePreferenceAnalysis $output/gene_analysis $bed_folder $scripts/gene_analysis/order_human.tsv $output/mito_count.tsv > $output/logs/gene_analysis.log &
 
 wait
 
