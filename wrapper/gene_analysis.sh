@@ -111,7 +111,9 @@ rm $bed_folder/RD1.bed $bed_folder/RD2.bed $bed_folder/RD3.bed -f
 # Correlation between CG count to PPB
 bedtools getfasta -fi $genome -bed $ref/hg38_mt_cds_ensembl.bed -fo $output/cg/cds.fa -s
 eval $heatmap/count_background.py $output/cg/cds.fa --mono -s -o $output/cg/cds_mono.tsv 
-eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -o $output/cg/cds_nontemplate.tsv
-eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate &
+eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -o $output/cg/cds_nontemplate_vs_cg_nontemplate.tsv
+eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -r -o $output/cg/cds_nontemplate_vs_cg_template.tsv
+eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate_vs_cg_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate_vs_cg_nontemplate &
+eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate_vs_cg_template.tsv -o $output/plots/regplot_cg/cds_nontemplate_vs_cg_template &
 
 

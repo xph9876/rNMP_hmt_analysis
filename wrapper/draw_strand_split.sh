@@ -126,3 +126,11 @@ rename 's/.raw.tsv/_raw.tsv/' $output/strand_split/tsv/* -f
 $heatmap_barplot/strand_split_plot.py $output/strand_split/tsv/chrM_mono_light_raw.tsv $output/strand_split/tsv/chrM_mono_heavy_raw.tsv -o $output/strand_split/plots/chrM_count.png --no_annot
 $heatmap_barplot/strand_split_plot.py $output/strand_split/tsv/chrM_mono_light_raw.tsv $output/strand_split/tsv/chrM_mono_heavy_raw.tsv -o $output/strand_split/plots/chrM_count_annot.png
 
+# Draw contribution for strand split
+$heatmap_barplot/strand_split_contribution.py \
+    $output/strand_split/raw/chrM_mono_light.raw \
+    $output/strand_split/raw/chrM_mono_heavy.raw \
+    $output/strand_split/bg/chrM_mono_light.raw \
+    $output/strand_split/bg/chrM_mono_heavy.raw \
+    $order -o $output/strand_split/plots/strand_split
+

@@ -23,6 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description='Append mononucleotide frequency to rNMP in hmtDNA gene file')
     parser.add_argument('tsv', type=argparse.FileType('r'), help='Input rNMP count in hmtDNA gene tsv file')
     parser.add_argument('mono', type=argparse.FileType('r'), help='Input mono count file')
+    parser.add_argument('-r', action='store_true', help='Append the reverse strand of input')
     parser.add_argument('-o', default=sys.stdout, type=argparse.FileType('w'), help='Output to file')
     args = parser.parse_args()
 
@@ -33,10 +34,16 @@ def main():
     freq = read_mono(args.mono)
 
     # add columns
-    data['A'] = data.apply(add_mono, axis=1, freq=freq, id=0)
-    data['C'] = data.apply(add_mono, axis=1, freq=freq, id=1)
-    data['G'] = data.apply(add_mono, axis=1, freq=freq, id=2)
-    data['T'] = data.apply(add_mono, axis=1, freq=freq, id=3)
+    if not args.r:
+        data['A'] = data.apply(add_mono, axis=1, freq=freq, id=0)
+        data['C'] = data.apply(add_mono, axis=1, freq=freq, id=1)
+        data['G'] = data.apply(add_mono, axis=1, freq=freq, id=2)
+        data['T'] = data.apply(add_mono, axis=1, freq=freq, id=3)
+    else:
+        data['A'] = data.apply(add_mono, axis=1, freq=freq, id=3)
+        data['C'] = data.apply(add_mono, axis=1, freq=freq, id=2)
+        data['G'] = data.apply(add_mono, axis=1, freq=freq, id=1)
+        data['T'] = data.apply(add_mono, axis=1, freq=freq, id=0)
 
     data.to_csv(args.o, index=False, sep='\t')
 
