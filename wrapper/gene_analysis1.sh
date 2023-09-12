@@ -12,7 +12,7 @@ ref="$1/ref"
 control_bed="$1/control_bed"
 genome="$1/../refseq/hg38_chrM.fa"
 
-for aa in intersect raw info plots bg mono cg
+for aa in intersect raw info plots cg
 do
     if ! [ -d $output/$aa ]
     then
@@ -20,7 +20,7 @@ do
     fi
 done
  
-for aa in intersect mono
+for aa in intersect
 do
     for bb in cds noncoding random
     do
@@ -55,44 +55,25 @@ wait
 
 rename 's/.bed_nt/_nontemplate.bed/;s/.bed_t/_template.bed/;s/.bed_/_/' $output/intersect/*/* -f
 
-# Background for each CDS
-for ty in cds noncoding random
-do
-    bedtools getfasta -fi $genome -bed $ref/${ty}.bed -fo $output/bg/${ty}.fa -s
-    eval $heatmap/count_background.py $output/bg/${ty}.fa --mono -s -o $output/bg/${ty}_mono.tsv 
-done
-
 # count intersections
 for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $heatmap/count_rNMP.py $genome $output/intersect/${ty}/*_${st}.bed -o $output/mono/${ty}/chrM &
+        wc -l $output/intersect/${ty}/*_${st}.bed | head -n -1 | sed "s/^ *//;s/ /\t/;s/\t.*\//\t/;s/_${st}.bed//;s/_/\t/g" | awk 'BEGIN{OFS="\t"}{print $2, $3, $1}' > $output/raw/${ty}_${st}.raw &
     done
 done
 wait
-
-# Summarize libraries
-for st in template nontemplate
-do
-    for ty in cds noncoding random
-    do
-        eval $heatmap/get_chrom.py $output/mono/${ty}/chrM*_${st}.mono -o $output/raw/${ty}_${st}.raw &
-    done
-done
-wait
-
 
 # add cds information
 for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $scripts/add_info.py $output/raw/${ty}_${st}.raw $order $scripts/ref/${ty}.gtf $mito_count $output/bg/${ty}_mono.tsv -c 2 -o $output/info/${ty}_${st}.tsv &   
+        eval $scripts/add_info.py $output/raw/${ty}_${st}.raw $order $scripts/ref/${ty}.gtf $mito_count -c 2 -o $output/info/${ty}_${st}.tsv &   
     done
 done
 wait
-
 
 # draw heatmap
 for st in template nontemplate
@@ -127,8 +108,12 @@ wait
 # remove random bed files
 rm $bed_folder/RD1.bed $bed_folder/RD2.bed $bed_folder/RD3.bed -f
 
-# draw regplot for C and G
-eval $scripts/draw_regplot_cg.py $output/info/cds_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate &
-wait
+# Correlation between CG count to PPB
+bedtools getfasta -fi $genome -bed $ref/hg38_mt_cds_ensembl.bed -fo $output/cg/cds.fa -s
+eval $heatmap/count_background.py $output/cg/cds.fa --mono -s -o $output/cg/cds_mono.tsv 
+eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -o $output/cg/cds_nontemplate_vs_cg_nontemplate.tsv
+eval $scripts/append_mono.py $output/info/cds_nontemplate.tsv $output/cg/cds_mono.tsv -r -o $output/cg/cds_nontemplate_vs_cg_template.tsv
+eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate_vs_cg_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate_vs_cg_nontemplate &
+eval $scripts/draw_regplot_cg.py $output/cg/cds_nontemplate_vs_cg_template.tsv -o $output/plots/regplot_cg/cds_nontemplate_vs_cg_template &
 
 

@@ -41,8 +41,8 @@ def main():
     ylabel_texts = [f'{len_dict[x]}nt {x}' for x in gene_names]
     xlabel_texts = [f'{geno_dict[x]}-{x}' for x in libs]
 
-    for fea in ["Count_rank","RPB_rank",'PPB']:
-        data = df.pivot(index="Gene_name", columns="Library", values=fea)
+    for fea in ['PPB'] + [f'PPB_{r}' for r in 'ACGT']:
+        data = df.pivot(index="Gene_name", columns="Library", values=fea).fillna(0)
         # sort
         data = data.loc[gene_names, libs]
         # set color settings for graph
@@ -56,9 +56,7 @@ def main():
         if fea == 'PPB':
             sns.heatmap(data, vmin=0, vmax=0.00013, ax=ax, cmap='rocket')
         else:
-            sns.heatmap(data, ax=ax, annot=True, annot_kws={"size":13}, cmap='rocket_r')
-            # invert color scale
-            plt.gcf().axes[-1].invert_yaxis()
+            sns.heatmap(data, vmin=0, ax=ax, cmap='rocket')
         ax.set_yticklabels(ylabel_texts, rotation='horizontal')
         ax.set_xticklabels(xlabel_texts, rotation='vertical')
         

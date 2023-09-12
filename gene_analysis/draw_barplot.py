@@ -32,8 +32,6 @@ def to_scientific(x, pos):
     b = str(int(ws[1]))
     return f'{a}E{b}'
 
-    
-
 
 def main():
     # argparse
