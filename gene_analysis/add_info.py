@@ -28,10 +28,13 @@ def read_gtf(fr):
 # read order
 def read_libinfo(fr, c):
     data = {}
+    i = 0
     for l in fr:
+        i += 1
         ws = l.rstrip().split('\t')
         name = ws.pop(c)
-        data[name] = '-'.join(ws)
+        data[name] = ['-'.join(ws), i]
+    data = pd.DataFrame.from_dict(data, orient='index', columns=['Genotype', 'Order'])
     return data
 
 # read data
@@ -93,7 +96,7 @@ def main():
     # add information
     df['Total_chrM_rNMPs'] = df.Library.map(mito_count)
     df['Total'] = df['A'] + df['C'] + df['G'] + df['T']
-    df['Genotype'] = df.Library.map(libinfo)
+    df = df.merge(libinfo, left_on='Library', right_index=True)
     df = df.merge(cds_info, on='Gene_id')
     df['loc'] = df.apply(generate_loc, axis=1)
     df = df.merge(bg_count, left_on='loc', right_index=True)
@@ -107,10 +110,13 @@ def main():
     df = df.rename(columns={
         'RPB_Total':'RPB', 'PPB_Total':'PPB'
         })
-    
+
+    # Get library order
+    df = df.sort_values(by=['Order', 'Length'], ascending=[True, False])
     # remove useless columns and rows
-    df = df.drop(columns=['loc', 'Total_bg'])
+    df = df.drop(columns=['loc', 'Total_bg', 'Order'])
     df = df.dropna(axis=0)
+
 
     # output
     df.to_csv(args.o, sep='\t', index=False)

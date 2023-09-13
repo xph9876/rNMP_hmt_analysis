@@ -12,7 +12,7 @@ ref="$1/ref"
 control_bed="$1/control_bed"
 genome="$1/../refseq/hg38_chrM.fa"
 
-for aa in intersect raw info plots bg mono cg
+for aa in intersect raw info plots bg mono cg info_with_ND6
 do
     if ! [ -d $output/$aa ]
     then
@@ -46,20 +46,34 @@ do
     do
         for bb in $(ls $ref_bed/${ty})
         do
-            bedtools intersect -a $bed_folder/$aa -b $ref_bed/${ty}/$bb -nonamecheck -s > $output/intersect/${ty}/${aa}_${bb}_nt &
-            bedtools intersect -a $bed_folder/$aa -b $ref_bed/${ty}/$bb -nonamecheck -S > $output/intersect/${ty}/${aa}_${bb}_t &
+            bedtools intersect \
+                -a $bed_folder/$aa \
+                -b $ref_bed/${ty}/$bb \
+                -nonamecheck \
+                -s > $output/intersect/${ty}/${aa}_${bb}_nt &
+
+            bedtools intersect \
+                -a $bed_folder/$aa \
+                -b $ref_bed/${ty}/$bb \
+                -nonamecheck \
+                -S > $output/intersect/${ty}/${aa}_${bb}_t &
         done
     done
 done
 wait
 
-rename 's/.bed_nt/_nontemplate.bed/;s/.bed_t/_template.bed/;s/.bed_/_/' $output/intersect/*/* -f
+rename 's/.bed_nt/_nontemplate.bed/;s/.bed_t/_template.bed/;s/.bed_/_/' \
+    $output/intersect/*/* -f
 
 # Background for each CDS
 for ty in cds noncoding random
 do
     bedtools getfasta -fi $genome -bed $ref/${ty}.bed -fo $output/bg/${ty}.fa -s
-    eval $heatmap/count_background.py $output/bg/${ty}.fa --mono -s -o $output/bg/${ty}_mono.tsv 
+    eval $heatmap/count_background.py \
+        $output/bg/${ty}.fa \
+        --mono \
+        -s \
+        -o $output/bg/${ty}_mono.tsv 
 done
 
 # count intersections
@@ -67,7 +81,10 @@ for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $heatmap/count_rNMP.py $genome $output/intersect/${ty}/*_${st}.bed -o $output/mono/${ty}/chrM &
+        eval $heatmap/count_rNMP.py \
+            $genome \
+            $output/intersect/${ty}/*_${st}.bed \
+            -o $output/mono/${ty}/chrM &
     done
 done
 wait
@@ -77,7 +94,9 @@ for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $heatmap/get_chrom.py $output/mono/${ty}/chrM*_${st}.mono -o $output/raw/${ty}_${st}.raw &
+        eval $heatmap/get_chrom.py \
+            $output/mono/${ty}/chrM*_${st}.mono \
+            -o $output/raw/${ty}_${st}.raw &
     done
 done
 wait
@@ -88,8 +107,24 @@ for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $scripts/add_info.py $output/raw/${ty}_${st}.raw $order $scripts/ref/${ty}.gtf $mito_count $output/bg/${ty}_mono.tsv -c 2 -o $output/info/${ty}_${st}.tsv &   
+        eval $scripts/add_info.py \
+            $output/raw/${ty}_${st}.raw \
+            $order \
+            $scripts/ref/${ty}.gtf \
+            $mito_count \
+            $output/bg/${ty}_mono.tsv \
+            -c 2 \
+            -s ${st} \
+            -o $output/info_with_ND6/${ty}_${st}.tsv &   
     done
+done
+wait
+
+
+# Remove ND6
+for data in $(ls $output/info_with_ND6)
+do
+    grep -v ND6 $output/info_with_ND6/$data > $output/info/$data &
 done
 wait
 
@@ -99,7 +134,10 @@ for st in template nontemplate
 do
     for ty in cds noncoding random
     do
-        eval $scripts/draw_heatmap.py $output/info/${ty}_${st}.tsv --no_cbar -o $output/plots/heatmap/${ty}_${st} &   
+        eval $scripts/draw_heatmap.py \
+            $output/info/${ty}_${st}.tsv \
+            --no_cbar \
+            -o $output/plots/heatmap/${ty}_${st} &   
     done
 done
 wait
@@ -110,7 +148,10 @@ do
     cat $output/info/cds_${st}.tsv > $output/info/${st}.tsv
     tail -n +2 $output/info/noncoding_${st}.tsv >> $output/info/${st}.tsv
     sed -i 's/MT-//g' $output/info/${st}.tsv
-    eval $scripts/draw_barplot.py $output/info/${st}.tsv $scripts/gene_names.tsv -o $output/plots/barplot/${st} &
+    eval $scripts/draw_barplot.py \
+        $output/info/${st}.tsv \
+        $scripts/gene_names.tsv \
+        -o $output/plots/barplot/${st} &
 done
 wait
 
@@ -119,7 +160,9 @@ for st in template nontemplate
 do
     for ty in cds
     do
-        eval $scripts/draw_regplot.py $output/info/${ty}_${st}.tsv -o $output/plots/regplot/${ty}_${st} &
+        eval $scripts/draw_regplot.py \
+            $output/info/${ty}_${st}.tsv \
+            -o $output/plots/regplot/${ty}_${st} &
     done
 done
 wait
@@ -128,7 +171,9 @@ wait
 rm $bed_folder/RD1.bed $bed_folder/RD2.bed $bed_folder/RD3.bed -f
 
 # draw regplot for C and G
-eval $scripts/draw_regplot_cg.py $output/info/cds_nontemplate.tsv -o $output/plots/regplot_cg/cds_nontemplate &
+eval $scripts/draw_regplot_cg.py \
+    $output/info/cds_nontemplate.tsv \
+    -o $output/plots/regplot_cg/cds_nontemplate &
 wait
 
 
