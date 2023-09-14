@@ -82,7 +82,6 @@ def main():
     parser.add_argument('bg_count', type=argparse.FileType('r'), help='TSV file of mitochondrial rNMP count for each gene')
     parser.add_argument('-c', type=int, default=1, help='Column number of library name in libinfo, default=1')
     parser.add_argument('-s', choices={'template', 'nontemplate'}, default='nontemplate', help='Input strand: template/(nontemplate)')
-    parser.add_argument('--mt_size', type=int, default=16569*2, help='mtDNA size (16569*2)')
     parser.add_argument('-o', default=sys.stdout, type=argparse.FileType('w'), help='Output to file')
     args = parser.parse_args()
     args.c -= 1
@@ -107,9 +106,9 @@ def main():
     # Calculate RPB and PPB
     for fea in ['A', 'C', 'G', 'T', 'Total']:
         df[f'RPB_{fea}'] = df[fea]/df[f'{fea}_bg']
-        df[f'EF_{fea}'] = df[f'RPB_{fea}']/df['Total_chrM_rNMPs']*args.mt_size
+        df[f'PPB_{fea}'] = df[f'RPB_{fea}']/df['Total_chrM_rNMPs']
     df = df.rename(columns={
-        'RPB_Total':'RPB', 'EF_Total':'EF'
+        'RPB_Total':'RPB', 'PPB_Total':'PPB'
         })
 
     # Get library order

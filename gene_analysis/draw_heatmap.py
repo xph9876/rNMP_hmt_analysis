@@ -41,7 +41,7 @@ def main():
     ylabel_texts = [f'{len_dict[x]}nt {x}' for x in gene_names]
     xlabel_texts = [f'{geno_dict[x]}-{x}' for x in libs]
 
-    for fea in ['PPB'] + [f'PPB_{r}' for r in 'ACGT']:
+    for fea in ['EF'] + [f'EF_{r}' for r in 'ACGT']:
         data = df.pivot(index="Gene_name", columns="Library", values=fea).fillna(0)
         # sort
         data = data.loc[gene_names, libs]
@@ -53,10 +53,10 @@ def main():
         else:
             fig, ax = plt.subplots(figsize=(15,12))
             plt.subplots_adjust(left=0.18, top=0.99, bottom=0.3, right=0.95)
-        if fea == 'PPB':
-            sns.heatmap(data, vmin=0, vmax=0.00013, ax=ax, cmap='rocket')
+        if fea == 'EF':
+            sns.heatmap(data, vmin=0, vmax=3.4, ax=ax, cmap='rocket')
         else:
-            sns.heatmap(data, vmin=0, ax=ax, cmap='rocket')
+            sns.heatmap(data, vmin=0, vmax=5.4, ax=ax, cmap='rocket')
         ax.set_yticklabels(ylabel_texts, rotation='horizontal')
         ax.set_xticklabels(xlabel_texts, rotation='vertical')
         

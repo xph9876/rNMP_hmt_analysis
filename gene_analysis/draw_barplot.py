@@ -39,7 +39,6 @@ def main():
     parser.add_argument('data',type=argparse.FileType('r'), help='CDS CSV data file')
     parser.add_argument('genes', type=argparse.FileType('r'), help='List of genes')
     parser.add_argument('-o', default='human_genes', help='output basename')
-    parser.add_argument('--baseline', default='ND5', help='Baseline gene name, (ND5)')
     args = parser.parse_args()
 
     # read data
@@ -57,24 +56,15 @@ def main():
     df = df.sort_values(by=['Gene_type', 'Length'])
     df = df[~df.Gene_type.isin({'ncDNA', 'tDNA'})].copy()
 
-    # normalize on baseline genes
-    assert args.baseline in df.Gene_name.unique(), f'Baseline gene {args.baseline} not in the input files'
-    nd5 = df[df.Gene_name == args.baseline][['Library', 'PPB']]
-    df = df.merge(nd5, how='left', left_on='Library', right_on='Library', suffixes=('', '_base'))
-    df['Enrichment_factor'] = df.PPB/df.PPB_base
-    df.to_csv('test.tsv', sep='\t')
-
     # barplot
     sns.set(font_scale=1.5, style='ticks')
     fig, ax = plt.subplots(figsize=(6, 6))
     plt.subplots_adjust(left=0.1, top=0.98, bottom=0.4, right=0.98)
-    sns.barplot(x='Gene_name', y='Enrichment_factor', errorbar='sd', data=df, \
+    sns.barplot(x='Gene_name', y='EF', errorbar='sd', data=df, \
         errwidth=1.3, capsize=0.3, ax=ax, palette=gene_colors)
-    sns.stripplot(x='Gene_name', y='Enrichment_factor', dodge=True, color='black', size=2, data=df, ax=ax)
+    sns.stripplot(x='Gene_name', y='EF', dodge=True, color='black', size=2, data=df, ax=ax)
     sns.despine()
     ax.set_xticklabels([f'{gene_lengths[x.get_text()]}bp-{x.get_text()}' for x in ax.get_xticklabels()], rotation=90)
-    # plt.ylim([0, 2])
-    # ax.yaxis.set_major_formatter(to_scientific)
     plt.ylabel('')
     plt.xlabel('')
     fig.savefig(args.o + '_bar.png')
