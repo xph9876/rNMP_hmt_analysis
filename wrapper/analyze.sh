@@ -27,7 +27,6 @@ do
     fi
 done
 
-
 # Count rNMPs in each library
 curr=$(pwd)
 cd $bed_folder
@@ -93,6 +92,7 @@ eval $wrapper/gene_analysis.sh \
 
 wait
 
+# Gather figures
 for folder in heatmap_barplot control_region_figures gene_analysis strand_split
 do
     mv $output/$folder/plots $output/plots/$folder

@@ -15,17 +15,17 @@ def load_info(fr):
         info[ws[1]] = (i, ws[0])
     return info 
 
-# load background frequence
-def get_bg(fr):
+# load background frequency
+def get_bg(fr, name):
     data = {}
     header = fr.readline().rstrip('\n').split('\t')
     for l in fr:
         ws = l.rstrip('\n').split('\t')
+        if ws[0] != name:
+            continue
         for i in range(1, len(ws)):
             data[header[i]] = float(ws[i])
     return data
-
-
 
 # get category from info
 def get_category(x, info):
@@ -136,6 +136,7 @@ def main():
     parser.add_argument('fwd_bg', type=argparse.FileType('r'), help='background count for light strand')
     parser.add_argument('rev_bg', type=argparse.FileType('r'), help='background count for heavy strand')
     parser.add_argument('info', type=argparse.FileType('r'), help='Library information')
+    parser.add_argument('--chrom', default='chrM', help='Chromosome name in background frequency files (chrM)')
     parser.add_argument('-o', default='strand_split_contribution', help='Output plot name')
     args = parser.parse_args()
 
@@ -143,8 +144,8 @@ def main():
     info = load_info(args.info)
 
     # get background frequence
-    l_bg = get_bg(args.fwd_bg)
-    h_bg = get_bg(args.rev_bg)
+    l_bg = get_bg(args.fwd_bg, args.chrom)
+    h_bg = get_bg(args.rev_bg, args.chrom)
 
     # Format data
     df = load_data(args.fwd_count, args.rev_count, info, l_bg, h_bg)
