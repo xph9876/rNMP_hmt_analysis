@@ -41,8 +41,6 @@ def main():
 
     # Draw figures
     draw(df, '7S_EF', args.o + '_ef.png')
-    draw(df, '7S_rev_EF', args.o + '_rev_ef.png')
-
 
     print('Done!')
 
